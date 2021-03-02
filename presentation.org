@@ -1,154 +1,226 @@
-* Mail in Emacs!
+* Managing Email With mu4e and Other Software
 
-* What will be discussed
-- How do you read email?
-- Briefly discuss email options in Emacs
+
+Eric Collins
+
+Founder/Co-organizer of EmacsNYC
+Engineering Manager at Parachute Health
+* Mail in Emacs!
+#+BEGIN_SRC shell :results output
+echo "mu! mu mu! muuuuuu!" | cowsay
+#+END_SRC
+
+#+RESULTS:
+:  _____________________
+: < mu! mu mu! muuuuuu! >
+:  ---------------------
+:         \   ^__^
+:          \  (oo)\_______
+:             (__)\       )\/\
+:                 ||----w |
+:                 ||     ||
+
+* Overview
+
+- Different options fo sending/receiving email
+- Overview of mu/mu4e
+- Syncing mail locally
+- Sending mail
 - Setup email client in Emacs
-- Indexing mail for quick searching
-- Download mail locally for nonblocking background sync
-- Sending mail when online and offline
-- Signing/Encrypting mail using your PGP key
 - Storing/retrieving passwords safely
-- Setting up multiple accounts(if we have time)
+- Setting up multiple accounts
+- Signing/Encrypting mail using your PGP key
+
+* Software Overview
+
+- [[https://www.djcbsoftware.nl/code/mu/][mu/mu4e]]
+- [[https://sourceforge.net/projects/isync/][isync/mbsync]]
+- [[https://marlam.de/msmtp/][msmtp]]
 
 * How do you read/send email?
-Lots of different ways to read/send email.
+
+Lots of different ways to read/send email
 
 - Webmail provided by the email provider
 - Many dedicated GUI application
 - A few dedicated command line applications
-- cat-ing a mail file and subsequently deleting it
 - Several Emacs clients and solutions
 
-* Choosing the right option for you
+* Emacs Mail clients
 
-Let's be honest, the right option is always Emacs.
+- A few built-in clients(Gnus, Rmail)
+- Many more packages(mu4e, Wanderlust, notmuch, etc.)
+- Each approaches the problem a bit differently
+- Typically quite feature rich
+- Comes down to personal preference
+- Check out EmacsWiki page: https://www.emacswiki.org/emacs/CategoryMail
 
-- Allows the most familiar interface(hopefully)
+* Choosing the right option
+
+- Allows the most familiar interface(no mouse)
 - Use any number of email providers
-- Keep all accounts in one place
 - Natively sign/encrypt emails with PGP key
 - The comfort knowing you're using free software
 - Endless customization(depending on your elisp skills)
 
-* Briefly discuss email options in Emacs
-Check out EmacsWiki page: https://www.emacswiki.org/emacs/CategoryMail
+* Mu/Mu4e(Mail Utils 4 Emacs)
 
-- A few built-in clients
-- Many more packages
-- Each approaches the problem a bit differently
-- Typically quite feature rich
-- Usually comes down to personal preference
+- Dirk-Jan C. Binnema
+- At least since 2009, most likely longer
+- Emacs interface since 2012
 
-* Bring in Mu/Mu4e(Mail Utils 4 Emacs)
 - Simple interface and backend
-- Quick indexing with fast powerful search
-- Better supported my goal of being inbox zero
+- Quick indexing with fast powerful search using Xapian
 - Easily setup multiple accounts
+- Minimal workload on Emacs
 - Active project
 
 * Setup email client in Emacs
-Let's do this!
 
-* First let's talk about email account
+  Let's go!
+
+* Email account
+
+- emacsnyc@fastmail.com
+
+- Fastmail
+#+BEGIN_QUOTE
+Sign up, sign in, and webmail all work smoothly. This is a paid
+service with a 60-day free trial. - UPDATE: was notified that this is
+not the case.
+#+END_QUOTE
+- Temporary account
+- There may be differences from other setups
+- Email me
 
 * Setup account to sync locally
-- Querying your mail is a synchronous HTTP(this is Emacs after all)
-- Setting up isync(or OfflineIMAP if you prefer)
-- Let's configure this thing
+
+- Querying your remote mail server is synchronous
+
+- isync/mbsync allows you to store a local copy
+- Much faster querying for Emacs
+- mu4e requires mail in Maildir
 - [[file:./mbsyncrc][mbsync config]]
 
-* Install mu/mu4e
-- Package is not found on MELPA or other package archives
-- Likely will be built from source
+* Download mail locally
 
-* Setup mu for indexing later
-- mu indexes mail
-- Stores maildir and my-address(can be specified multiple times)
-- Later used in emacs to minimize configuration
-- Can separately specify different muhome to cache index elsewhere
+#+BEGIN_SRC shell :results output silent
+  rm ~/.mbsyncrc
+  ln -s `pwd`/mbsyncrc ~/.mbsyncrc
+  mkdir --parents $HOME/.mail/emacsnyc
+  mbsync --all
+#+END_SRC
+
+* Install mu/mu4e
+
+- mu4e is a part of the mu project
+- Having mu provides mu4e
+- Package is not found on MELPA
+- Some distributions provide it
+- Easily built from source
+
+* Setup mu
+
+- Stores maildir and my-address(multiple)
+- Slightly improves configuration
+- For different account specify different muhome
 
 #+BEGIN_SRC bash
   mu init \
      --maildir=$HOME/.mail/emacsnyc \
-     --muhome=$HOME/.mu/emacsnyc \
-     --my-address=emacsnyc@fastmail.com
+     --my-address=emacsnyc@fastmail.com \
+     --muhome=$HOME/.mu/emacsnyc
 #+END_SRC
+
+#+begin_example
+database-path      : /home/eric/.mu/emacsnyc/xapian
+messages in store  : 0
+schema-version     : 451
+created            : Sun 28 Feb 2021 11:17:34 PM EST
+maildir            : /home/eric/.mail/emacsnyc
+personal-addresses : emacsnyc@fastmail.com
+
+store created.
+use 'mu index' to fill the database with your messages.
+see mu-index(1) for details
+#+end_example
+
+* Index mail
+
+- Index all mail based on muhome
+- One email doesn't require separate muhome
+
+#+BEGIN_SRC shell :results output silent
+  mu index --muhome=$HOME/.mu/emacsnyc
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+database-path      : /home/eric/.mu/emacsnyc/xapian
+messages in store  : 0
+schema-version     : 451
+created            : Sun 28 Feb 2021 11:17:34 PM EST
+maildir            : /home/eric/.mail/emacsnyc
+personal-addresses : emacsnyc@fastmail.com
+
+cleaning up messages [/home/eric/.mu/emacsnyc/xapian]
+\ processing mail; processed: 24; updated/new: 0, cleaned-up: 0
+elapsed: 0 second(s)
+| processing mail; processed: 24; updated/new: 0, cleaned-up: 0
+elapsed: 0 second(s)
+#+end_example
+
 * Setting up .emacs to use mu4e(just the basics)
-- Since it's been built from source you'll need to add it to your load
-  path
-#+BEGIN_SRC emacs-lisp
+
+- Add to source and configure
+
+#+BEGIN_SRC emacs-lisp :results output silent
   (add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
   (require 'mu4e)
 
   (setq mail-user-agent 'mu4e-user-agent)
   (setq user-mail-address "emacsnyc@fastmail.com")
-  (mu4e-mu-home . "~/.mu/emacsnyc")
+  (setq mu4e-mu-home "~/.mu/emacsnyc")
+  (setq mu4e-change-filenames-when-moving t)
 #+END_SRC
 
 * Some additional settings
-#+BEGIN_SRC emacs-lisp
+
+#+BEGIN_SRC emacs-lisp :results output silent
   (setq mu4e-compose-signature
         (s-join
          "\n"
          '("Eric J. Collins"
            "EmacsNYC Founder/Co-Organizer")))
   (setq mu4e-attachment-dir  "~/downloads")
-  (setq mu4e-compose-dont-reply-to-self t)
-  (setq mu4e-change-filenames-when-moving t)
+  ;; (setq mu4e-get-mail-command "mbsync emacsnyc")
 #+END_SRC
 
-* Download mail
-- Download mail locally
-- Config defaults to $HOME/.mbsyncrc
-- only specified for this demo
-#+BEGIN_SRC shell
-  mbsync --all --config ./mbsyncrc
-#+END_SRC
-* Index mail
-- Index all mail based on muhome
-- If using only using email this does not need to be specified
-- Will default to $HOME/.cache/mu ~/.config/mu for index and cache respectively
-#+BEGIN_SRC shell
-  mu index --muhome=$HOME/.mu/emacsnyc
-#+END_SRC
 * That's it
+
 - Demo time!
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results output silent
 (mu4e)
 #+END_SRC
 
-* But wait! How do we send mail?
-We can read mail, but we can't send mail... yet.
+* Some more odds and ends
 
-* Sending mail when online(msmtp)
-- Install/setup msmtp or another sendmail compatible service
-- Configure msmtp to with correct account information
-- [[./msmtprc][msmtp configuration]]
-* Setup mu4e
-- Ensure mu4e is setup to send mail
+There are few QoL that we can do to make our life a bit easier
 
-#+BEGIN_SRC emacs-lisp
-  (setq message-send-mail-function 'message-send-mail-with-sendmail)
-  (setq sendmail-program "/usr/bin/msmtp")
-  (setq message-sendmail-extra-arguments '("--read-envelope-from"))
-  (setq message-sendmail-f-is-evil 't)
-#+END_SRC
-* Signing/Encrypting mail using your PGP key
-You want to sign each message
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'mu4e-compose-mode-hook 'mml-secure-message-sign)
-#+END_SRC
+- quickly moving to a folder
+#+begin_src emacs-lisp :results output silent
+(setq mu4e-maildir-shortcuts
+'(("/inbox" . ?i)))
+#+end_src
+- refresh index every two minutes
+#+begin_src emacs-lisp :results output silent
+  (setq mu4e-update-interval 120)
+#+end_src
+- Cronjob/Systemd timer to sync mail
+- Improve how we deal with passwords
 
-To encrypt each message beforehand run
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'mu4e-compose-mode-hook 'mml-secure-message-encrypt)
-#+END_SRC
+* Security vs. convenience
 
-- Each can be run individually within a compose message
-- Can automatically decrypt and verify messages
-
-* Typing password everytime is not great
 The more you have to type a password the more likely you are to
 optimize faster password typing instead of better security.
 
@@ -160,6 +232,7 @@ Goals:
 - Accessible to both sending and receiving mail programs
 
 * Storing/retrieving passwords safely
+
 - Store passwords within a secure vault
 - [[https://www.passwordstore.org/][Standard Unix Password Manager]]
 - Easy command line retrieval
@@ -167,7 +240,41 @@ Goals:
 - Stored inside of a password protected file too
 - Still need to have something that stores session
 
+* But wait! How do we send mail?
+
+We can read mail, but we can't send mail... yet.
+
+* Sending mail when online(msmtp)
+
+- Install/setup msmtp or another sendmail compatible service
+- Configure msmtp to with correct account information
+- [[./msmtprc][msmtp configuration]]
+
+* Setup mu4e
+
+- Ensure mu4e is setup to send mail
+
+#+BEGIN_SRC shell :results output silent
+rm ~/.msmtprc
+ln -s `pwd`/msmtprc ~/.msmtprc
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :results output silent
+  (setq mu4e-compose-dont-reply-to-self t)
+  (setq message-send-mail-function 'message-send-mail-with-sendmail)
+  (setq sendmail-program "/usr/bin/msmtp")
+  (setq message-sendmail-extra-arguments '("--read-envelope-from"))
+  (setq message-sendmail-f-is-evil t)
+#+END_SRC
+
+* Back to mu4e
+
+#+begin_src emacs-lisp
+  (mu4e)
+#+end_src
+
 * Setting up multiple accounts(contexts)
+
 Allow for as many accounts as you'd like and switch between the
 seamlessly.
 
@@ -189,7 +296,28 @@ seamlessly.
                     (mu4e-mu-home . "~/.mu/emacsnyc")
                     (user-mail-address . "emacsnyc@fastmail.com")))))
 #+END_SRC
+
+* Signing/Encrypting mail using your PGP key
+
+Let Emacs know about your key
+#+begin_src emacs-lisp
+  (setq mml-secure-openpgp-signers '("786F8224"))
+#+end_src
+You want to sign each message
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'mu4e-compose-mode-hook 'mml-secure-message-sign)
+#+END_SRC
+
+To encrypt each message beforehand run
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'mu4e-compose-mode-hook 'mml-secure-message-encrypt)
+#+END_SRC
+
+- Each can be run individually within a compose message
+- Can automatically decrypt and verify messages
+
 * Using with org and org-capture
+
 - Automatically setup by default
 - Access to the following:
   - type
@@ -203,7 +331,16 @@ seamlessly.
   - link
   - description
 - %a expansion provides the link(along with the title) to the message at point
+
 * Non exhaustive list of other features
+
 - sauron for email alerts
 - Custom markers for quick actions on reproducible swaths of messages
 - Smart-refiling
+
+* Thanks
+
+Questions?
+
+Want to give a talk? Want to say hi?
+admin@emacsnyc.org

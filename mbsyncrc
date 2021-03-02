@@ -3,15 +3,15 @@
 # spacing are important.
 
 Create Both # Automatically create missing mailboxes
-Expunge Both # Automatically delete any message marked for deletion
+# Expunge Both # Automatically delete any message marked for trash
 SyncState *
 
 ## Define account name and
 IMAPAccount emacsnyc
 Host imap.fastmail.com
 User emacsnyc@fastmail.com
-PassCmd "pass fastmail.com/laptop_emacsnyc"
 SSLType IMAPS
+PassCmd "pass fastmail.com/laptop_emacsnyc"
 
 # Establish name of IMAP remote server
 IMAPStore emacsnyc-remote
@@ -24,32 +24,33 @@ Inbox ~/.mail/emacsnyc/inbox
 
 # Setup connections between remote and local connections
 # This provides simple transforms allowing us to using
-# a naming convention we specify
-# Channel emacsnyc-default
-# Master :emacsnyc-remote:
-# Slave :emacsnyc-local:
-# Patterns "INBOX"
+# a naming convention we specify.
+# mu4e uses lowercase for everything which I like
+Channel emacsnyc-default
+Master :emacsnyc-remote:
+Slave :emacsnyc-local:
+Patterns "INBOX"
 
-# Channel emacsnyc-archive
-# Master :emacsnyc-remote:Archive
-# Slave :emacsnyc-local:archive
+Channel emacsnyc-archive
+Master :emacsnyc-remote:Archive
+Slave :emacsnyc-local:archive
 
-# Channel emacsnyc-draft
-# Master :emacsnyc-remote:Drafts
-# Slave :emacsnyc-local:drafts
+Channel emacsnyc-draft
+Master :emacsnyc-remote:Drafts
+Slave :emacsnyc-local:drafts
 
-# Channel emacsnyc-sent
-# Master :emacsnyc-remote:Sent
-# Slave :emacsnyc-local:sent
+Channel emacsnyc-sent
+Master :emacsnyc-remote:Sent
+Slave :emacsnyc-local:sent
 
-# Channel emacsnyc-trash
-# Master :emacsnyc-remote:Trash
-# Slave :emacsnyc-local:trash
+Channel emacsnyc-trash
+Master :emacsnyc-remote:Trash
+Slave :emacsnyc-local:trash
 
-# # Specify group to easily sync
-# Group emacsnyc
-# Channel emacsnyc-default
-# Channel emacsnyc-draft
-# Channel emacsnyc-archive
-# Channel emacsnyc-sent
-# Channel emacsnyc-trash
+# Specify group to run sync
+Group emacsnyc
+Channel emacsnyc-default
+Channel emacsnyc-draft
+Channel emacsnyc-archive
+Channel emacsnyc-sent
+Channel emacsnyc-trash
