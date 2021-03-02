@@ -1,0 +1,5 @@
+* Mail in Emacs with mu4e and Other Software
+
+Presented by: Eric Collins
+
+These are the slides and materials for use.
